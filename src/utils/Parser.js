@@ -1,11 +1,14 @@
 /**
- * 
+ * Parser Utilities
+ * @class
+ * @private
  */
 export class Parser {
 
     /**
-     * 
-     * @param {*} args 
+     * Parses the CLI arguments.
+     * @param {Object} args - The command line arguments.
+     * @return {Object} The parsed command line arguments.
      */
     static parseCLIArgs(args) {
         const tmp = {};
@@ -39,5 +42,15 @@ export class Parser {
         }
 
         return tmp;
+    }
+
+    /**
+     * Checks if an argument exists in the command line.
+     * @param {string} name - The argument name.
+     * @param {Object} args - The command line arguments.
+     * @return {boolean} If the argument exists.
+     */
+    static argExists(name, args) {
+        return (args[name]) ? true : false;
     }
 }
