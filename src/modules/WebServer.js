@@ -4,6 +4,7 @@ import fs from "fs";
 import url from "url";
 import path from "path";
 import { Parser } from "../utils/Parser";
+import { LiveReload } from "./LiveReload";
 
 /**
  * Map of Mime Types
@@ -51,6 +52,8 @@ export class WebServer {
         this.spa = Parser.argExists("spa", args);
         this.live = Parser.argExists("live", args);
         this.silent = Parser.argExists("silent", args);
+
+        this.currentRouteFragments = "/";
     }
 
     /**
@@ -63,9 +66,10 @@ export class WebServer {
             if (!this.silent) console.log(`${req.method} ${req.url}`);
         });
 
-        /* connect live reloading */
-
         this.httpServer.listen(this.port, callback);
+
+        /* connect live reloading */
+        if (this.live) LiveReload.enable(this);
     }
 
     /**
@@ -76,33 +80,76 @@ export class WebServer {
      */
     _handleRequest(req, res) {
         const parsedUrl = url.parse(req.url);
-        const sanitizePath = path.normalize(parsedUrl.pathname).replace(/^(\.\.[\/\\])+/, '');
-        let pathname = path.join(this.root, sanitizePath);
+        const sanitizedPath = path.normalize(parsedUrl.pathname).replace(/^(\.\.[\/\\])+/, '');
+        let pathname = path.join(this.root, sanitizedPath);
 
-        if (fs.existsSync(pathname)) {
-            if (fs.statSync(pathname).isDirectory()) {
-                pathname += `/${this.file}`;
+        if (this.spa) {
+
+            if (!pathname.includes(".")) {
+                this.currentRouteFragments = req.url.split("/");
+
+                if(this.live) {
+                    LiveReload.injectSnippet(path.join(this.root, this.file), res);
+                    return;
+                }
+
+                this._serveFile(path.join(this.root, this.file), res);
+            } else {
+                for (let fragment of this.currentRouteFragments) {
+                    pathname = pathname.replace(fragment, "");
+                }
+                pathname = path.normalize(pathname);
+                if (fs.existsSync(pathname)) {
+                    this._serveFile(pathname, res);
+                } else {
+                    res.statusCode = 404;
+                    res.end(`ERROR 404: ${pathname} not found.`);
+                }
             }
 
-            /* inject code */
-
-            /* try to serve the reqed static file */
-            this._serveFile(pathname, res);
         } else {
-            if (!this.spa) {
+
+            if(fs.existsSync(pathname)) {
+
+                if(fs.statSync(pathname).isDirectory()) {
+                    pathname = path.join(pathname, this.file);
+                }
+
+                if(this.live) {
+                    if(pathname.endsWith(".html") || pathname.endsWith(".htm")) {
+                        LiveReload.injectSnippet(pathname, res);
+                        return;
+                    }
+                }
+
+                this._serveFile(pathname, res);
+            } else {
                 res.statusCode = 404;
                 res.end(`ERROR 404: ${pathname} not found.`);
-                return;
             }
 
-            const spaPath = `${this.root}/${this.file}`;
-
-            /* inject code */
-
-            /* try to serve the spa file */
-            this._serveFile(spaPath, res);
-
         }
+    }
+
+    /**
+     * Resolve the path when the path does not exist.
+     * (Used for SPA routing)
+     * @param {string} pathname - The pathname to resolve.
+     */
+    _resolvePath(pathname) {
+        const fragments = pathname.split("/");
+        let resolvedPath = "";
+        for (let fragment of fragments) {
+            if (fs.existsSync(path.join(this.root, resolvedPath, fragment))) {
+                resolvedPath = path.join(resolvedPath, fragment);
+            }
+        }
+
+        if (resolvedPath.includes(".")) {
+            return resolvedPath;
+        }
+
+        return resolvedPath + fragments[fragments.length - 1];
     }
 
     /**

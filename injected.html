@@ -1,0 +1,9 @@
+<!-- Code injected by jolt-server -->
+<script type="text/javascript">
+    !function(){"use strict";let e=null;function t(){e&&1===e.readyState&&(e.send("heartbeat"),setTimeout(t,500))}
+    !function n(){e=new WebSocket("ws://localhost:3000"),e.onclose=n,e.onopen=t,e.onmessage=()=>{let e=event.data.toString();
+    "reload"==e?window.location.reload():"updatecss"==e&&function(){const e=[].slice.call(document.getElementsByTagName("link")),
+    t=document.getElementsByTagName("head")[0];for(let n=0;n<e.length;++n){const o=e[n];t.removeChild(o);const a=o.rel;
+    if(o.href&&"string"!=typeof a||0==a.length||"stylesheet"==a.toLowerCase()){const e=o.href.replace(/(&|\?)_cacheOverride=\d+/,"");
+    o.href=e+(e.indexOf("?")>=0?"&":"?")+"_cacheOverride="+(new Date).valueOf()}t.appendChild(o)}}()}}()}();
+</script>
