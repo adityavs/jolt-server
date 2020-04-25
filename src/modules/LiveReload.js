@@ -2,14 +2,21 @@
 import fs from "fs";
 import os from "os";
 import path from "path";
-import { WebSocket } from "./sockets/WebSocket";
 
 /**
  * The Code to be Injected
  * @type {string}
  * @private
  */
-const INJECTED_CODE = fs.readFileSync(path.normalize(path.join(__dirname, "../injected.html")), "utf8");
+const INJECTED_CODE = `
+<!-- Code injected by jolt-server -->
+<script>
+    const source = new EventSource("/reload");
+    const reload = () => window.location.reload();
+    source.onmessage = reload;
+    source.onerror = () => (source.onopen = reload);
+</script>
+`;
 
 /**
  * Enables LiveReload Functionality
@@ -21,28 +28,35 @@ export class LiveReload {
     /**
      * Enables live reloading.
      * @param {WebServer} server - The web server to connect to.
+     * @param {Response} res - The response to use.
      */
-    static enable(server) {
-        LiveReload._wss = new WebSocket(server.httpServer);
-
-        const options = (["darwin", "win32"].includes(os.platform())) ? { recursive: true } : {};
-
-        fs.watch(server.root, options, (event, filename) => {
-            if (filename) {
-                if (LiveReload._fsWait) return;
-
-                const cssChange = (path.extname(filename) == ".css");
-                LiveReload._fsWait = setTimeout(() => {
-                    LiveReload._fsWait = false;
-                }, 100);
-
-                const reloadType = cssChange ? "updatecss" : "reload";
-
-                for (let socket of LiveReload._wss.connections) {
-                    socket.send(reloadType);
-                }
-            }
+    static enable(server, res) {
+        res.writeHead(200, {
+            "Content-type": "text/event-stream",
+            "Cache-Control": "no-cache",
+            "Connection": "keep-alive"
         });
+
+        LiveReload._connections.push(res);
+
+        if(!LiveReload._enabled) {
+            LiveReload.watch(server.root, (event, filename) => {
+                if(filename) {
+                    if(LiveReload._fsWait) return;
+
+                    LiveReload._fsWait = setTimeout(() => {
+                        LiveReload._fsWait = false;
+                    }, 100);
+
+                    for(let connection of LiveReload._connections) {
+                        connection.write("data: reload\n\n");
+                        LiveReload._connections.slice(LiveReload._connections.indexOf(connection), 1);
+                    }
+                }
+            });
+
+            LiveReload._enabled = true;
+        }
     }
 
     /**
@@ -74,7 +88,25 @@ export class LiveReload {
             res.end(data);
         }
     }
-}
 
-LiveReload._wss = null;
+    /**
+     * Watches a file or directory for changes.
+     * @param {string} target - The file or directory to watch.
+     * @param {function} callback - The callback to use.
+     */
+    static watch(target, callback) {
+        if (!["darwin", "win32"].includes(os.platform())) {
+            if (fs.statSync(target).isDirectory()) {
+                fs.watch(target, callback);
+                fs.readdirSync(target).forEach((entry) => {
+                    LiveReload.watch(`${path}/${entry}`, callback);
+                });
+            }
+        } else {
+            fs.watch(target, { recursive: true }, callback);
+        }
+    }
+}
+LiveReload._connections = [];
+LiveReload._enabled = false;
 LiveReload._fsWait = false;

@@ -51,7 +51,6 @@ export class WebServer {
         this.port = Parser.argExists("port", args) ? args.port : 3000;
         this.spa = Parser.argExists("spa", args);
         this.live = Parser.argExists("live", args);
-        this.silent = Parser.argExists("silent", args);
 
         this.currentRouteFragments = "/";
     }
@@ -62,14 +61,14 @@ export class WebServer {
      */
     listen(callback) {
         this.httpServer = http.createServer((req, res) => {
-            this._handleRequest(req, res);
-            if (!this.silent) console.log(`${req.method} ${req.url}`);
+            if(this.live && req.url == "/reload") {
+                LiveReload.enable(this, res);
+            } else {
+                this._handleRequest(req, res);
+            }
         });
 
         this.httpServer.listen(this.port, callback);
-
-        /* connect live reloading */
-        if (this.live) LiveReload.enable(this);
     }
 
     /**
@@ -88,11 +87,11 @@ export class WebServer {
             if (!pathname.includes(".")) {
                 this.currentRouteFragments = req.url.split("/");
 
-                if(this.live) {
+                if (this.live) {
                     LiveReload.injectSnippet(path.join(this.root, this.file), res);
                     return;
                 }
-
+                
                 this._serveFile(path.join(this.root, this.file), res);
             } else {
                 for (let fragment of this.currentRouteFragments) {
@@ -109,14 +108,14 @@ export class WebServer {
 
         } else {
 
-            if(fs.existsSync(pathname)) {
+            if (fs.existsSync(pathname)) {
 
-                if(fs.statSync(pathname).isDirectory()) {
+                if (fs.statSync(pathname).isDirectory()) {
                     pathname = path.join(pathname, this.file);
                 }
 
-                if(this.live) {
-                    if(pathname.endsWith(".html") || pathname.endsWith(".htm")) {
+                if (this.live) {
+                    if (pathname.endsWith(".html") || pathname.endsWith(".htm")) {
                         LiveReload.injectSnippet(pathname, res);
                         return;
                     }
