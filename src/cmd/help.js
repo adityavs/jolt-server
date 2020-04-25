@@ -15,8 +15,7 @@ const helpMap = {
         -r, --root ........... Sets the folder to serve static assets from.
         -f, --file ........... Sets the default file to serve.
         -l, --live ........... Enables live reloading.
-        -s, --silent ......... Disables request logging.
-        --spa ................ Enables Push State routing support.
+        -s, --spa .......... Enables Push State routing support.
     `,
 };
 

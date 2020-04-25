@@ -46,11 +46,11 @@ export class WebServer {
      */
     constructor(args) {
         this.httpServer = null;
-        this.root = Parser.argExists("root", args) ? args.root : process.cwd();
-        this.file = Parser.argExists("file", args) ? args.file : "index.html";
-        this.port = Parser.argExists("port", args) ? args.port : 3000;
-        this.spa = Parser.argExists("spa", args);
-        this.live = Parser.argExists("live", args);
+        this.root = Parser.argExists("root", "r", args) ? args.root || args.r : process.cwd();
+        this.file = Parser.argExists("file", "f", args) ? args.file || args.f : "index.html";
+        this.port = Parser.argExists("port", "p", args) ? args.port || args.p : 3000;
+        this.spa = Parser.argExists("spa", "s", args);
+        this.live = Parser.argExists("live", "l", args);
 
         this.currentRouteFragments = "/";
     }

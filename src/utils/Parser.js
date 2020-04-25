@@ -50,7 +50,7 @@ export class Parser {
      * @param {Object} args - The command line arguments.
      * @return {boolean} If the argument exists.
      */
-    static argExists(name, args) {
-        return (args[name]) ? true : false;
+    static argExists(name, alt, args) {
+        return (args[name]) || (args[alt]) ? true : false;
     }
 }
