@@ -14,16 +14,17 @@
     "cli",
     "hot-reloading",
     "dev-server",
-    "server"
+    "server",
+    "spa"
   ],
   "files": [
     "dist"
   ],
   "exports": {
     ".": {
-      "require": "./dist/api.cjs.js",
-      "import": "./dist/api.esm.js",
-      "default": "./dist/api.cjs.js"
+      "require": "dist/api.cjs.js",
+      "import": "dist/api.esm.js",
+      "default": "dist/api.cjs.js"
     }
   },
   "bin": {
