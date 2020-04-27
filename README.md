@@ -56,7 +56,7 @@ server({
 ## Why?
 
 Jolt Server was developed to provide a easy setup for developing web apps.
-Most alternatives use a bunch of dependencies to achieve the disired functionality and for single page applications, they often dont work for complex routes. Jolt Server solves this problem by not using any dependencies, and making sure that single page applications that utilize push state routing will have no problems being run on this server.
+Most alternatives use a bunch of dependencies to achieve the desired functionality and as for the case with single page applications, they often dont work for complex routes. Jolt Server solves these problems by not using any dependencies, and making sure that single page applications that utilize push state routing will have no problems being run on this server.
 
 ---
 
