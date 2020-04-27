@@ -16,6 +16,9 @@ const helpMap = {
         -f, --file ........... Sets the default file to serve.
         -l, --live ........... Enables live reloading.
         -s, --spa .......... Enables Push State routing support.
+        
+        --key .............. Sets the SSL private key.
+        --cert ............. Sets the SSL certificate.
     `,
 };
 

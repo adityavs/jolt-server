@@ -7,10 +7,7 @@ import { WebServer } from "../modules/WebServer";
  * @private
  */
 function serve(args) {
-    const server = new WebServer(args);
-    server.listen(() => {
-        console.log(`Serving "${server.root}" on port ${server.port}`);
-    });
+    new WebServer(args).listen();
 }
 
 export default serve;

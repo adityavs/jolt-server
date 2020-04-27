@@ -1,5 +1,6 @@
 /* imports */
 import http from "http";
+import https from "https";
 import fs from "fs";
 import url from "url";
 import path from "path";
@@ -46,29 +47,67 @@ export class WebServer {
      */
     constructor(args) {
         this.httpServer = null;
+        this.currentRouteFragments = [];
+        this.protocol = "http";
+
         this.root = Parser.argExists("root", "r", args) ? args.root || args.r : process.cwd();
         this.file = Parser.argExists("file", "f", args) ? args.file || args.f : "index.html";
         this.port = Parser.argExists("port", "p", args) ? args.port || args.p : 3000;
         this.spa = Parser.argExists("spa", "s", args);
         this.live = Parser.argExists("live", "l", args);
 
-        this.currentRouteFragments = "/";
+        this.key = Parser.argExists("key", null, args) ? args.key : false;
+        this.cert = Parser.argExists("cert", null, args) ? args.cert : false;
     }
 
-    /**
-     * Starts the WebServer.
-     * @param {function} [callback] - The callback for when the server starts.
-     */
-    listen(callback) {
-        this.httpServer = http.createServer((req, res) => {
-            if(this.live && req.url == "/reload") {
+    /** Starts the WebServer. */
+    listen() {
+        this.httpServer = this._createServer((req, res) => {
+            if (this.live && req.url == "/reload") {
                 LiveReload.enable(this, res);
             } else {
                 this._handleRequest(req, res);
             }
         });
 
-        this.httpServer.listen(this.port, callback);
+        this.httpServer.listen(this.port, () => {
+            console.log(`Serving "${this.root}" at ${this.protocol}://localhost:${this.port}`);
+        });
+    }
+
+    /**
+     * Creates the server with https if available and fallsback to http.
+     * @param {function} callback - The callback to run when a request occurs.
+     * @return {http.Server} The http server.
+     * @private
+     */
+    _createServer(callback) {
+        if(this.key && this.cert) {
+            try {
+                const options = this._loadCredintials(this.key, this.cert);
+                this.protocol = "https";
+                return https.createServer(options, callback);
+            } catch {
+                console.error("Failed to load SSL certificate.");
+                return http.createServer(callback);
+            }
+        } else {
+            return http.createServer(callback);
+        }
+    }
+
+    /**
+     * Loads the HTTPS key and cert files.
+     * @param {string} key - The key filename.
+     * @param {string} cert - The cert filename.
+     * @return {Object} The credintials config.
+     * @private
+     */
+    _loadCredintials(key, cert) {
+        return {
+            key: fs.readFileSync(key),
+            cert: fs.readFileSync(cert)
+        };
     }
 
     /**
@@ -91,7 +130,7 @@ export class WebServer {
                     LiveReload.injectSnippet(path.join(this.root, this.file), res);
                     return;
                 }
-                
+
                 this._serveFile(path.join(this.root, this.file), res);
             } else {
                 for (let fragment of this.currentRouteFragments) {
@@ -158,14 +197,16 @@ export class WebServer {
      * @private
      */
     _serveFile(filename, res) {
-        try {
-            const data = fs.readFileSync(filename);
+        fs.readFile(filename, (error, data) => {
+            if (error) {
+                res.statusCode = 500;
+                res.end(error.message);
+                return;
+            }
+
             const ext = path.parse(filename).ext;
             res.setHeader("Content-type", MIME_TYPES[ext]);
             res.end(data);
-        } catch (error) {
-            res.statusCode = 500;
-            res.end(error.message);
-        }
+        });
     }
 }
