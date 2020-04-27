@@ -82,7 +82,7 @@ export class WebServer {
      * @private
      */
     _createServer(callback) {
-        if(this.key && this.cert) {
+        if (this.key && this.cert) {
             try {
                 const options = this._loadCredintials(this.key, this.cert);
                 this.protocol = "https";
@@ -136,20 +136,20 @@ export class WebServer {
                 for (let fragment of this.currentRouteFragments) {
                     pathname = pathname.replace(fragment, "");
                 }
-                pathname = path.normalize(pathname);
-                if (fs.existsSync(pathname)) {
-                    this._serveFile(pathname, res);
-                } else {
-                    res.statusCode = 404;
-                    res.end(`ERROR 404: ${pathname} not found.`);
-                }
+                this._serveFile(path.normalize(pathname), res);
+
+
             }
 
         } else {
 
-            if (fs.existsSync(pathname)) {
+            fs.stat(pathname, (error, stats) => {
+                if (error) {
+                    console.error(error);
+                    return;
+                }
 
-                if (fs.statSync(pathname).isDirectory()) {
+                if (stats.isDirectory()) {
                     pathname = path.join(pathname, this.file);
                 }
 
@@ -161,33 +161,8 @@ export class WebServer {
                 }
 
                 this._serveFile(pathname, res);
-            } else {
-                res.statusCode = 404;
-                res.end(`ERROR 404: ${pathname} not found.`);
-            }
-
+            });
         }
-    }
-
-    /**
-     * Resolve the path when the path does not exist.
-     * (Used for SPA routing)
-     * @param {string} pathname - The pathname to resolve.
-     */
-    _resolvePath(pathname) {
-        const fragments = pathname.split("/");
-        let resolvedPath = "";
-        for (let fragment of fragments) {
-            if (fs.existsSync(path.join(this.root, resolvedPath, fragment))) {
-                resolvedPath = path.join(resolvedPath, fragment);
-            }
-        }
-
-        if (resolvedPath.includes(".")) {
-            return resolvedPath;
-        }
-
-        return resolvedPath + fragments[fragments.length - 1];
     }
 
     /**
@@ -199,8 +174,13 @@ export class WebServer {
     _serveFile(filename, res) {
         fs.readFile(filename, (error, data) => {
             if (error) {
-                res.statusCode = 500;
-                res.end(error.message);
+                if (error.errno == -2) {
+                    res.statusCode = 404;
+                    res.end(`ERROR 404: ${error.path} not found.`);
+                } else {
+                    res.statusCode = 500;
+                    res.end(error.message);
+                }
                 return;
             }
 

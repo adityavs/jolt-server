@@ -72,21 +72,31 @@ export class LiveReload {
 
         let injectTag = null;
 
-        const contents = fs.readFileSync(pathname, "utf8");
-        for (let i = 0; i < injectCandidates.length; ++i) {
-            const match = injectCandidates[i].exec(contents);
-            if (match) {
-                injectTag = match[0];
-                break;
+        fs.readFile(pathname, "utf8", (error, data) => {
+            if(error) {
+                if (error.errno == -2) {
+                    res.statusCode = 404;
+                    res.end(`ERROR 404: ${error.path} not found.`);
+                } else {
+                    res.statusCode = 500;
+                    res.end(error.message);
+                }
+                return;
             }
-        }
 
-        if (injectTag) {
-            const data = contents.replace(injectTag, INJECTED_CODE + injectTag);
-
-            res.setHeader("Content-type", "text/html");
-            res.end(data);
-        }
+            for (let i = 0; i < injectCandidates.length; ++i) {
+                const match = injectCandidates[i].exec(data);
+                if (match) {
+                    injectTag = match[0];
+                    break;
+                }
+            }
+    
+            if (injectTag) {
+                res.setHeader("Content-type", "text/html");
+                res.end(data.replace(injectTag, INJECTED_CODE + injectTag));
+            }
+        });
     }
 
     /**
