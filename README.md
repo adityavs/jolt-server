@@ -31,6 +31,8 @@ CLI Options:
 - `-f, --file` - sets the fallback file to serve. (default: `index.html`)
 - `-l, --live` - sets the server to reload the page when a file is saved.
 - `-s, --spa` - sets the server to respond to all routes with the fallback file.
+- `--key` - sets the SSL private key to use for https.
+- `--cert` - sets the SSL certificate to use for https.
 
 ---
 
