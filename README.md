@@ -34,6 +34,9 @@ CLI Options:
 - `--key` - sets the SSL private key to use for https.
 - `--cert` - sets the SSL certificate to use for https.
 
+API Only Options:
+- `handler` - sets a callback for handling request yourself.
+
 ---
 
 ## JavaScript Usage
@@ -50,6 +53,20 @@ server({
     file: "index.html",
     live: true,
     spa: true
+});
+```
+
+jolt-server also allows you to handle requests yourself. You can do this by passing a function to the `handler` option.
+In order to prevent jolt-server from also trying to handle it, you must call `res.end();` this sends the response and tells jolt-server that the request has been handled.
+
+**Example:**
+```js
+import server from "jolt-server";
+
+server({
+    handler: function(req, res) {
+        res.end("request has been handled");
+    }
 });
 ```
 

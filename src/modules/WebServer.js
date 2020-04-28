@@ -58,11 +58,21 @@ export class WebServer {
 
         this.key = Parser.argExists("key", null, args) ? args.key : false;
         this.cert = Parser.argExists("cert", null, args) ? args.cert : false;
+
+        /* API only options */
+        this.handler = Parser.argExists("handler", null, args) ? args.handler : false;
     }
 
     /** Starts the WebServer. */
     listen() {
         this.httpServer = this._createServer((req, res) => {
+            if (this.handler instanceof Function) {
+                this.handler(req, res);
+                if(res.writableEnded || res.finished) {
+                    return;
+                }
+            }
+
             if (this.live && req.url == "/reload") {
                 LiveReload.enable(this, res);
             } else {
@@ -73,6 +83,8 @@ export class WebServer {
         this.httpServer.listen(this.port, () => {
             console.log(`Serving "${this.root}" at ${this.protocol}://localhost:${this.port}`);
         });
+
+        return this.httpServer;
     }
 
     /**
@@ -145,7 +157,7 @@ export class WebServer {
 
             fs.stat(pathname, (error, stats) => {
                 if (error) {
-                    console.error(error);
+                    console.error(error.message);
                     return;
                 }
 
