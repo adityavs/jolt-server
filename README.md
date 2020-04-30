@@ -18,6 +18,7 @@ npm install --save-dev jolt-server
 ```
 
 Documentation is availiable [here](https://outwalk-studios.github.io/jolt-server/).
+
 ---
 
 ## Command Line Usage
