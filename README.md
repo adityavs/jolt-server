@@ -1,6 +1,6 @@
 # Jolt Server
 
-A development server supporting live reloading, single page applications, and static file serving.
+A web server supporting live reloading, single page applications, and static file serving.
 
 ![Actions](https://github.com/outwalk-studios/jolt-server/workflows/build/badge.svg)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](https://github.com/outwalk-studios/jolt-server/blob/master/LICENSE)
@@ -16,6 +16,8 @@ Install using [npm](https://www.npmjs.com/package/jolt-server):
 ```bash
 npm install --save-dev jolt-server
 ```
+
+Documentation is availiable [here](https://outwalk-studios.github.io/jolt-server/).
 ---
 
 ## Command Line Usage
@@ -33,9 +35,6 @@ CLI Options:
 - `-s, --spa` - sets the server to respond to all routes with the fallback file.
 - `--key` - sets the SSL private key to use for https.
 - `--cert` - sets the SSL certificate to use for https.
-
-API Only Options:
-- `handler` - sets a callback for handling request yourself.
 
 ---
 
@@ -56,17 +55,31 @@ server({
 });
 ```
 
-jolt-server also allows you to handle requests yourself. You can do this by passing a function to the `handler` option.
-In order to prevent jolt-server from also trying to handle it, you must call `res.end();` this sends the response and tells jolt-server that the request has been handled.
+jolt-server also allows you to handle requests yourself. You can do this by passing using the application interface returned by jolt-server.
+The application interface gives you access to the internal `server` variable as well as being able to respond to request using `get`, `post`, `put`, `patch`, and `delete` functions.
 
 **Example:**
 ```js
 import server from "jolt-server";
 
-server({
-    handler: function(req, res) {
-        res.end("request has been handled");
-    }
+const app = server({...});
+
+app.get("/home", function(req, res) {
+    res.end("You are at /home");
+});
+
+```
+
+Using the application interface, you can also handle parameterized urls. To access the parameters use the `req.params` property.
+
+**Example:**
+```js
+import server from "jolt-server";
+
+const app = server({...});
+
+app.get("/users/:user", function(req, res) {
+    res.end(`Hello ${req.params.user}!`);
 });
 ```
 
