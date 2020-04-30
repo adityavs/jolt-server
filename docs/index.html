@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>JSDoc: Home</title>
+
+    <script src="scripts/prettify/prettify.js"> </script>
+    <script src="scripts/prettify/lang-css.js"> </script>
+    <!--[if lt IE 9]>
+      <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+    <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+    <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+</head>
+
+<body>
+
+<div id="main">
+
+    <h1 class="page-title">Home</h1>
+
+    
+
+
+
+    
+
+
+    <h3> </h3>
+
+
+
+
+
+
+
+
+
+
+    
+
+
+
+
+    <section>
+        <article><h1>Jolt Server</h1>
+<p>A development server supporting live reloading, single page applications, and static file serving.</p>
+<p><img src="https://github.com/outwalk-studios/jolt-server/workflows/build/badge.svg" alt="Actions">
+<a href="https://github.com/outwalk-studios/jolt-server/blob/master/LICENSE"><img src="https://img.shields.io/badge/license-MIT-green.svg" alt="License"></a>
+<a href="https://discord.gg/2wDcVGg"><img src="https://img.shields.io/badge/chat-on%20discord-7289da.svg" alt="Chat Server"></a></p>
+<hr>
+<h2>Installation</h2>
+<p>You can install jolt-server using <a href="https://www.npmjs.com/package/jolt-server">npm</a>.</p>
+<p>Install using <a href="https://www.npmjs.com/package/jolt-server">npm</a>:</p>
+<pre class="prettyprint source lang-bash"><code>npm install --save-dev jolt-server
+</code></pre>
+<hr>
+<h2>Command Line Usage</h2>
+<p>To launch the dev server, just run the command <code>jolt-server</code>. </br>
+By default this will put it into a bare bones web server.</p>
+<p>You can add additonal functionality by using cli options.</p>
+<p>CLI Options:</p>
+<ul>
+<li><code>-p, --port</code> - sets the port the server will run on. (default: <code>3000</code>)</li>
+<li><code>-r, --root</code> - sets the folder that files will be served from. (default: <code>/</code>)</li>
+<li><code>-f, --file</code> - sets the fallback file to serve. (default: <code>index.html</code>)</li>
+<li><code>-l, --live</code> - sets the server to reload the page when a file is saved.</li>
+<li><code>-s, --spa</code> - sets the server to respond to all routes with the fallback file.</li>
+<li><code>--key</code> - sets the SSL private key to use for https.</li>
+<li><code>--cert</code> - sets the SSL certificate to use for https.</li>
+</ul>
+<p>API Only Options:</p>
+<ul>
+<li><code>handler</code> - sets a callback for handling request yourself.</li>
+</ul>
+<hr>
+<h2>JavaScript Usage</h2>
+<p>You can use jolt-server in your JavaScript file and pass it the same options as the cli.</p>
+<p><strong>Example:</strong></p>
+<pre class="prettyprint source lang-js"><code>import server from &quot;jolt-server&quot;;
+
+server({
+    port: 3000,
+    root: process.cwd(),
+    file: &quot;index.html&quot;,
+    live: true,
+    spa: true
+});
+</code></pre>
+<p>jolt-server also allows you to handle requests yourself. You can do this by passing a function to the <code>handler</code> option.
+In order to prevent jolt-server from also trying to handle it, you must call <code>res.end();</code> this sends the response and tells jolt-server that the request has been handled.</p>
+<p><strong>Example:</strong></p>
+<pre class="prettyprint source lang-js"><code>import server from &quot;jolt-server&quot;;
+
+server({
+    handler: function(req, res) {
+        res.end(&quot;request has been handled&quot;);
+    }
+});
+</code></pre>
+<hr>
+<h2>Why?</h2>
+<p>Jolt Server was developed to provide a easy setup for developing web apps.
+Most alternatives use a bunch of dependencies to achieve the desired functionality and as for the case with single page applications, they often dont work for complex routes. Jolt Server solves these problems by not using any dependencies, and making sure that single page applications that utilize push state routing will have no problems being run on this server.</p>
+<hr>
+<h2>Reporting Issues</h2>
+<p>If you are having trouble getting something to work with Jolt Server, you can ask in our <a href="https://discord.gg/2wDcVGg">discord</a> or create a new <a href="https://github.com/outwalk-studios/jolt-server/issues">Issue</a>.</p>
+<p>If you find a bug or if something is not working properly, you can report it by creating a new <a href="https://github.com/outwalk-studios/jolt-server/issues">Issue</a>.</p>
+<p>If Jolt Server does not fit your needs or is missing a feature you would like to see, let us know! We would greatly appreciate your feedback on it.</p>
+<p>You can contact Outwalk Studios directly using <code>support@outwalkstudios.com</code></p>
+<hr>
+<h2>License</h2>
+<p>Jolt Server is licensed under the terms of the <a href="https://github.com/outwalk-studios/jolt-server/blob/master/LICENSE"><strong>MIT</strong></a> license.</p></article>
+    </section>
+
+
+
+
+
+
+</div>
+
+<nav>
+    <h2><a href="index.html">Home</a></h2><h3>Classes</h3><ul><li><a href="Application.html">Application</a></li></ul><h3>Global</h3><ul><li><a href="global.html#serve">serve</a></li></ul>
+</nav>
+
+<br class="clear">
+
+<footer>
+    Documentation generated by <a href="https://github.com/jsdoc/jsdoc">JSDoc 3.6.4</a> on Wed Apr 29 2020 19:35:16 GMT-0700 (Pacific Daylight Time)
+</footer>
+
+<script> prettyPrint(); </script>
+<script src="scripts/linenumber.js"> </script>
+</body>
+</html>
